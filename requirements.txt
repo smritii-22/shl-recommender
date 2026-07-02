@@ -1,6 +1,7 @@
 fastapi
 uvicorn
+google-genai
+python-dotenv
 scikit-learn
 numpy
-pydantic
-python-dotenv
+requests
