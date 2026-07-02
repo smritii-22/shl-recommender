@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import json
 from pydantic import BaseModel
 from typing import List, Dict
-from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from llm import genreate_reply, rewrite_query, decide_next_action, ask_clarification
 
@@ -26,8 +26,11 @@ def make_text(item):
 
 catalog_texts=[make_text(item) for item in catalog]
 
-model=SentenceTransformer("all-MiniLM-L6-v2")
-catalog_embeddings=model.encode(catalog_texts)
+# model=SentenceTransformer("all-MiniLM-L6-v2")
+# catalog_embeddings=model.encode(catalog_texts)
+
+vectorizer = TfidfVectorizer(stop_words="english")
+catalog_embeddings = vectorizer.fit_transform(catalog_texts)
 
 class Message(BaseModel):
     role: str
@@ -49,8 +52,11 @@ def get_test_type(keys):
     return "0"
 
 def search_catalog(query, top_k=5):
-    query_embedding=model.encode([query])
-    scores=cosine_similarity(query_embedding, catalog_embeddings)[0]
+    # query_embedding=model.encode([query])
+    # scores=cosine_similarity(query_embedding, catalog_embeddings)[0]
+
+    query_embedding = vectorizer.transform([query])
+    scores = cosine_similarity(query_embedding, catalog_embeddings)[0]
     top_indices=scores.argsort()[::-1][:top_k]
 
     results = []
